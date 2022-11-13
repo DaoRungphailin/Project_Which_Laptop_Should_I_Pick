@@ -4,17 +4,6 @@ import pandas as pd
 from scipy import spatial
 
 
-"""class NewWindow(Toplevel):
-
-    def __init__(self, master=None):
-
-        super().__init__(master=master)
-        self.title("New Window")
-        self.geometry("200x200")
-        label = Label(self, text="This is a new Window")
-        label.pack()"""
-
-
 class AppWindow:
     def __init__(self, root):
         self.root = root
@@ -147,8 +136,11 @@ class AppWindow:
                 self.__ram = __ramgb[self.ram_options.index(
                     self.RAMclicked.get())]
 
-                self.__price = float(self.pricebox.get("1.0", tk.END))
-                print(self.__price)
+                self.__gpu = self.__gpu_scale.get()
+
+                self.__price = float(self.pricebox.get("1.0", tk.END))/10000
+                self.uservector = [self.__price,
+                                   self.__cpu, self.__SSD, self.__HDD, self.__ram, self.__gpu, self.__resolution]
                 return 0
             except:
                 print("Please check your input")
@@ -158,9 +150,23 @@ class AppWindow:
         if self.__getValue() == 0:
             newWindow = tk.Toplevel(self.root)
             newWindow.title("New Window")
-            newWindow.geometry("200x200")
+            newWindow.geometry("400x800")
+            similarity = calculate_cosine_sim(self.uservector, numpydata)
+            text = df_to_show.loc[similarity.index(
+                max(similarity))].to_list()
+            col = df_to_show.columns
+            a = 0
+            c = 1
+            string = ""
+            
+            for i in text[1:]:
+                if i != "NaN" or i!="nan":
+                    string += str(col[c])+'\t'+str(i)+'\n'
+                c += 1
+            textlabel = tk.Label(newWindow, text=string)
+            textlabel.pack()
         else:
-            #อยากสร้างหน้าต่างแสดงบอกว่ามี error
+            # อยากสร้างหน้าต่างแสดงบอกว่ามี error
             print("Error Occur ")
 
         return
@@ -175,14 +181,10 @@ def calculate_cosine_sim(vector, data):
 
 
 mainprogram = AppWindow(tk.Tk())
-"""data_to_cal = pd.read_csv("data_Used_ToCal.csv", skipinitialspace=True)
+data_to_cal = pd.read_csv("data_Used_ToCal.csv", skipinitialspace=True)
 numpydata = data_to_cal.to_numpy()
 numpydata = np.delete(numpydata, 0, 1)
 df_to_show = pd.read_csv("Laptop_Data.csv", skipinitialspace=True)
 
-# ราคา30k cpu i7 ssd 512 hdd 0 gpuคะแนน5 จอ FHD
-similarity = calculate_cosine_sim([3, 7, 0.5, 0, 8, 5, 2], numpydata)
-print(df_to_show.loc[similarity.index(max(similarity))])
-"""
 
 mainprogram.root.mainloop()
