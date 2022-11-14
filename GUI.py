@@ -1,18 +1,24 @@
 import tkinter as tk
+from tkinter import messagebox
 import numpy as np
 import pandas as pd
 from scipy import spatial
+import random
 
 
 class AppWindow:
     def __init__(self, root):
         self.root = root
         self.root.title("Which Laptop Should I Pick")
-        self.root.geometry("450x550")
+        self.root.geometry("450x580")
         root.resizable(width=False, height=False)
-        self.__Createselection_menu()
+        self._processor_score = [1, 2,  3,  5,  7,  9]
+        # HD,FHD,2K,4K
+        self._resolution_score = [1,  3,  5,  7]
+        self._ramgb = [4, 8, 16, 32]
+        self._Createselection_menu()
 
-    def __Createselection_menu(self):
+    def _Createselection_menu(self):
         ################################################### Speed ############################################
         self.speed_options = [
             "Level 1",
@@ -26,12 +32,12 @@ class AppWindow:
             "Level 9",
             "Level 10"
         ]
-        self.__Speedclicked = tk.StringVar()
-        self.__Speedclicked.set("Choose Speed")
-        self.__speed_drop = tk.OptionMenu(
-            self.root, self.__Speedclicked, *self.speed_options)
-        self.__speed_drop.config(width=10)
-        self.__speed_drop.pack(ipadx=10, ipady=15, expand=True)
+        self._Speedclicked = tk.StringVar()
+        self._Speedclicked.set("Choose Speed")
+        self._speed_drop = tk.OptionMenu(
+            self.root, self._Speedclicked, *self.speed_options)
+        self._speed_drop.config(width=10)
+        self._speed_drop.pack(ipadx=10, ipady=15, expand=True)
         ####################################################### CPU ################################################
         self.cpu_option = [
             "Intel Celeron",
@@ -43,10 +49,10 @@ class AppWindow:
         ]
         self.CPUclicked = tk.StringVar()
         self.CPUclicked.set("Choose CPU")
-        self.__cpu_drop = tk.OptionMenu(
+        self._cpu_drop = tk.OptionMenu(
             self.root, self.CPUclicked, *self.cpu_option)
-        self.__cpu_drop.config(width=15)
-        self.__cpu_drop.pack(ipadx=10, ipady=10, expand=True)
+        self._cpu_drop.config(width=15)
+        self._cpu_drop.pack(ipadx=10, ipady=10, expand=True)
         ################################################### RAM ##########################################
         self.ram_options = [
             "4 GB",
@@ -56,10 +62,10 @@ class AppWindow:
         ]
         self.RAMclicked = tk.StringVar()
         self.RAMclicked.set("Choose RAM")
-        self.__ram_drop = tk.OptionMenu(
+        self._ram_drop = tk.OptionMenu(
             self.root, self.RAMclicked, *self.ram_options)
-        self.__ram_drop.config(width=10)
-        self.__ram_drop.pack(ipadx=10, ipady=10, expand=True)
+        self._ram_drop.config(width=10)
+        self._ram_drop.pack(ipadx=10, ipady=10, expand=True)
         ####################################################### Storage SSD ############################################
         self.SSD_Option = [
             "0",
@@ -70,18 +76,18 @@ class AppWindow:
         ]
         self.SSDClick = tk.StringVar()
         self.SSDClick.set("Choose SSD Capacity ")
-        self.__storage_drop = tk.OptionMenu(
+        self._storage_drop = tk.OptionMenu(
             self.root,  self.SSDClick, *self.SSD_Option)
-        self.__storage_drop.config(width=15)
-        self.__storage_drop.pack(ipadx=20, ipady=10, expand=True)
+        self._storage_drop.config(width=15)
+        self._storage_drop.pack(ipadx=20, ipady=10, expand=True)
         ####################################################### Storage HDD ###############################################
         self.HDD_Option = ['0', "512", "1000"]
         self.HHDClick = tk.StringVar()
         self.HHDClick.set("Choose HDD Capacity")
-        self.__HHD_Drop = tk.OptionMenu(
+        self._HHD_Drop = tk.OptionMenu(
             self.root, self.HHDClick, *self.HDD_Option)
-        self.__HHD_Drop.config(width=15)
-        self.__HHD_Drop.pack(ipadx=20, ipady=10, expand=True)
+        self._HHD_Drop.config(width=15)
+        self._HHD_Drop.pack(ipadx=20, ipady=10, expand=True)
         ################################################## Resolution #################################################
         self.resolution_options = [
             "HD",
@@ -89,68 +95,85 @@ class AppWindow:
             "2K",
             "4K"
         ]
-        self.Resolutionclicked = tk.StringVar()
-        self.Resolutionclicked.set("Choose Resolution")
-        self.__resolution_drop = tk.OptionMenu(
-            self.root, self.Resolutionclicked, *self.resolution_options)
-        self.__resolution_drop.config(width=10)
-        self.__resolution_drop.pack(ipadx=15, ipady=10, expand=True)
+        self._Resolutionclicked = tk.StringVar()
+        self._Resolutionclicked.set("Choose Resolution")
+        self._resolution_drop = tk.OptionMenu(
+            self.root, self._Resolutionclicked, *self.resolution_options)
+        self._resolution_drop.config(width=10)
+        self._resolution_drop.pack(ipadx=15, ipady=10, expand=True)
         ################################################### GPU #########################################
-        self.__gpu_scale = tk.Scale(self.root, from_=2, to_=9, orient=tk.HORIZONTAL,
-                                    tickinterval=1, resolution=0.1, length=200, label="Choose GPU Speed")
+        self._gpu_scale = tk.Scale(self.root, from_=2, to_=9, orient=tk.HORIZONTAL,
+                                   tickinterval=1, resolution=0.1, length=200, label="Choose GPU Speed")
 
-        self.__gpu_scale.pack(ipadx=10, ipady=10, expand=True)
+        self._gpu_scale.pack(ipadx=10, ipady=10, expand=True)
         ################################################## Price ###########################################
-        self.__pricelabel = tk.Label(self.root, text="Choose Price")
-        self.__pricelabel.pack(expand=True)
-        self.pricebox = tk.Text(self.root, height=2, width=20)
-        self.pricebox.pack(ipadx=10, ipady=10, expand=True)
+        self._pricelabel = tk.Label(self.root, text="Choose Price")
+        self._pricelabel.pack(expand=True)
+        self._pricebox = tk.Text(self.root, height=2, width=20)
+        self._pricebox.pack(ipadx=10, ipady=10, expand=True)
         ################################################### Claculate #######################################
-        self.__btn = tk.Button(self.root, text="Calculate")
-        self.__btn.bind("<Button>", lambda e: self.__CreateNewWindow())
-        self.__btn.pack(pady=10)
+        self._btn = tk.Button(self.root, text="Calculate")
+        self._btn.bind("<Button>", lambda e: self._CreateNewWindow())
+        self._btn.pack(pady=10)
+        ################################################### Clear #######################################
+        self._btn = tk.Button(self.root, text="Clear")
+        self._btn.bind("<Button>", lambda e: self._Clear())
+        self._btn.pack(pady=10)
+    def _getValue(self):
+        # return 0 เมื่ออ่านค่าได้โดยไม่มี error , 1 เมื่อ userinput speed , 2 เมื่อไม่ได้ input speed และ ใส่ข้อมูลไม่ครบ
+        if self._Speedclicked.get() != "Choose Speed":
+            self._speed = self._Speedclicked.get()
+            self._speed = self.speed_options.index(self._speed)+1
+            #NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+            self._cpu = self._processor_score[int(round(
+                (((self._speed - 1)*(5-0))/(10-1))+1, 0))]
+            self._SSD = int(self.SSD_Option[int(
+                ((self._speed-1)*(4-1))/(10-1)+1)])/100
+            self._HDD = int(self.HDD_Option[int(
+                ((self._speed-1)*(2-0))/(10-1)+0)])/100
+            self._resolution = self._resolution_score[int(
+                ((self._speed-1)*(3-1))/(10-1)+1)]
+            self._ram = self._ramgb[int(
+                ((self._speed-1)*(3-0))/(10-1)+0)]
+            self._gpu = round((((self._speed-1)*(9-2))/(10-1)
+                               )+2+random.uniform(0, 0.6), 1)
+            self._price = (((((self._speed-1)*(100000-6000)) /
+                           (10-1))+6000)/10000)+round(random.uniform(0, 0.5), 4)
+            self.uservector = [self._price,
+                               self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution]
 
-    def __getValue(self):
-        # return 0 เมื่ออ่านค่าได้โดยไม่มี error , 1 เมื่อมี error
-        if self.__Speedclicked.get() != "Choose Speed":
-            self.__speed = self.__Speedclicked.get()
-            # ตรงนี้ยังไม่รู้ว่าจะทำให้มันสุ่มเลขขึ้นมายังไงให้มันmatchกับspeedที่user input
             return 0
         else:
             try:
-                __processor_score = [1, 2,  3,  5,  7,  9]
-                self.__cpu = __processor_score[self.cpu_option.index(
+
+                self._cpu = self._processor_score[self.cpu_option.index(
                     self.CPUclicked.get())]
 
-                self.__SSD = int(self.SSDClick.get())/1000
+                self._SSD = int(self.SSDClick.get())/100
 
-                self.__HDD = int(self.HHDClick.get())/1000
+                self._HDD = int(self.HHDClick.get())/100
 
-                # HD,FHD,2K,4K
-                __resolution_score = [1,  2,  3,  4]
+                self._resolution = self._resolution_score[self.resolution_options.index(
+                    self._Resolutionclicked.get())]
 
-                self.__resolution = __resolution_score[self.resolution_options.index(
-                    self.Resolutionclicked.get())]
-
-                __ramgb = [4, 8, 16, 32]
-                self.__ram = __ramgb[self.ram_options.index(
+                self._ram = self._ramgb[self.ram_options.index(
                     self.RAMclicked.get())]
 
-                self.__gpu = self.__gpu_scale.get()
+                self._gpu = self._gpu_scale.get()
 
-                self.__price = float(self.pricebox.get("1.0", tk.END))/10000
-                self.uservector = [self.__price,
-                                   self.__cpu, self.__SSD, self.__HDD, self.__ram, self.__gpu, self.__resolution]
+                self._price = float(self._pricebox.get("1.0", tk.END))/10000
+                self.uservector = [self._price,
+                                   self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution]
                 return 0
             except:
-                print("Please check your input")
                 return 1
 
-    def __CreateNewWindow(self):
-        if self.__getValue() == 0:
+    def _CreateNewWindow(self):
+        readstatus = self._getValue()
+        if readstatus == 0:
             newWindow = tk.Toplevel(self.root)
-            newWindow.title("New Window")
-            newWindow.geometry("400x800")
+            newWindow.title("Your Laptop")
+            newWindow.geometry("450x800")
             similarity = calculate_cosine_sim(self.uservector, numpydata)
             text = df_to_show.loc[similarity.index(
                 max(similarity))].to_list()
@@ -158,18 +181,28 @@ class AppWindow:
             a = 0
             c = 1
             string = ""
-            
-            for i in text[1:]:
-                if i != "NaN" or i!="nan":
-                    string += str(col[c])+'\t'+str(i)+'\n'
-                c += 1
-            textlabel = tk.Label(newWindow, text=string)
-            textlabel.pack()
-        else:
-            # อยากสร้างหน้าต่างแสดงบอกว่ามี error
-            print("Error Occur ")
 
-        return
+            for i in text[1:]:
+                i = str(i)
+                if i != "NaN" and i != "nan":
+                    string += str(col[c])+' : '+i+'\n'
+                c += 1
+            textlabel = tk.Text(newWindow)
+            textlabel.insert(tk.END, string)
+            textlabel.pack(fill=tk.BOTH, expand=1)
+        elif readstatus == 1:
+            messagebox.showerror(
+                title="Error", message="Please Check Your Input")
+            return
+
+    def _Clear(self):
+        self._Speedclicked.set("Choose Speed")
+        self.CPUclicked.set("Choose CPU")
+        self.RAMclicked.set("Choose RAM")
+        self.SSDClick.set("Choose SSD Capacity ")
+        self.HHDClick.set("Choose HDD Capacity")
+        self._Resolutionclicked.set("Choose Resolution")
+        self._pricebox.delete('1.0', tk.END)
 
 
 def calculate_cosine_sim(vector, data):
