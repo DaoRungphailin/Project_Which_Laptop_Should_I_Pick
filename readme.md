@@ -1,4 +1,4 @@
-คู่มือการใช้งาน Which laptop should i pick ?
+คู่มือการใช้งาน Which laptop should i pick
 
 ขั้นตอนการใช้งาน มีทางเลือก 2 วิธี
 วิธีที่ 1 เลือก Speed
