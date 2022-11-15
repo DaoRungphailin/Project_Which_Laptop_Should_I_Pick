@@ -16,7 +16,17 @@ class AppWindow:
         # HD,FHD,2K,4K
         self._resolution_score = [1,  3,  5,  7]
         self._ramgb = [4, 8, 16, 32]
+        self._CreateMenuBar()
         self._Createselection_menu()
+        self._readtxtfile()
+
+    def _CreateMenuBar(self):
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+        helpmenu = tk.Menu(menubar, tearoff=0)
+        helpmenu.add_command(label="Help Index", command=self._helpText)
+        helpmenu.add_command(label="About...", command=self._aboutText)
+        menubar.add_cascade(label="Help", menu=helpmenu)
 
     def _Createselection_menu(self):
         ################################################### Speed ############################################
@@ -126,24 +136,37 @@ class AppWindow:
             self._speed = self._Speedclicked.get()
             self._speed = self.speed_options.index(self._speed)+1
             #NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+
             self._cpu = self._processor_score[int(round(
-                (((self._speed - 1)*(5-0))/(10-1))+0, 0))]
+                (((self._speed - 1)*(5-1))/(10-0))+1, 0))]
             self._SSD = int(self.SSD_Option[int(
-                ((self._speed-1)*(4-0))/(10-1)+0)])/100
-            if self._speed < 3:
+                ((self._speed-1)*(4-1))/(10-1)+1)])/100
+            if self._speed == 1:
+                self._HDD = 0
+
+            elif self._speed <= 3:
                 self._HDD = int(self.HDD_Option[2])/100
             else:
                 self._HDD = 0
-            self._resolution = self._resolution_score[int(
-                ((self._speed-1)*(3-1))/(10-1)+1)]
+            if self._speed == 1:
+                self._resolution = 1
+            elif self._speed < 8:
+                self._resolution = 3
+            elif self._speed < 9:
+                self._resolution = 5
+            else:
+                self._resolution = 7
             self._ram = self._ramgb[int(
-                ((self._speed-1)*(3-0))/(10-1)+0)]
-            self._gpu = round((((self._speed-1)*(9-2))/(10-1)
-                               )+2+random.uniform(0, 0.7), 1)
-            self._price = (self._speed)+round(random.uniform(0, 0.5), 4)
+                ((self._speed-1)*(3-1))/(10-1)+1)]/2
+            if self._speed == 1:
+                self._gpu = 2
+            else:
+                self._gpu = round((((self._speed-1)*(9-2))/(10-1)
+                                   )+2+random.uniform(0, 0.7), 1)
+            self._price = (self._speed/1.32)+round(random.uniform(0, 0.5), 4)
             self.uservector = np.asarray([self._price,
                                           self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution])
-
+            print(self.uservector)
             return 0
         else:
             try:
@@ -159,7 +182,7 @@ class AppWindow:
                     self._Resolutionclicked.get())]
 
                 self._ram = self._ramgb[self.ram_options.index(
-                    self.RAMclicked.get())]
+                    self.RAMclicked.get())]/2
 
                 self._gpu = self._gpu_scale.get()
 
@@ -180,7 +203,6 @@ class AppWindow:
             text = df_to_show.loc[similarity.index(
                 max(similarity))].to_list()
             col = df_to_show.columns
-            a = 0
             c = 1
             string = ""
 
@@ -205,6 +227,27 @@ class AppWindow:
         self.HHDClick.set("Choose HDD Capacity")
         self._Resolutionclicked.set("Choose Resolution")
         self._pricebox.delete('1.0', tk.END)
+
+    def _readtxtfile(self):
+        self.helpString = ''
+        self.aboutString = ''
+        f1 = open("readme.md", "r", encoding="utf-8")
+        for i in f1:
+            self.helpString += i
+
+        f2 = open("about.txt", "r", encoding="utf-8")
+        for i in f2:
+            self.aboutString += i
+
+    def _helpText(self):
+        filewin = tk.Toplevel(self.root)
+        button = tk.Button(filewin, text=self.helpString, font=('Arial', 14))
+        button.pack()
+
+    def _aboutText(self):
+        filewin = tk.Toplevel(self.root)
+        button = tk.Button(filewin, text=self.aboutString, font=('Arial', 14))
+        button.pack()
 
 
 def calculate_cosine_sim(vector, data):
