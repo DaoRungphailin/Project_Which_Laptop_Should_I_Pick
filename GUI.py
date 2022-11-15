@@ -119,28 +119,30 @@ class AppWindow:
         self._btn = tk.Button(self.root, text="Clear")
         self._btn.bind("<Button>", lambda e: self._Clear())
         self._btn.pack(pady=10)
+
     def _getValue(self):
-        # return 0 เมื่ออ่านค่าได้โดยไม่มี error , 1 เมื่อ userinput speed , 2 เมื่อไม่ได้ input speed และ ใส่ข้อมูลไม่ครบ
+        # return 0 เมื่ออ่านค่าได้โดยไม่มี error , 1 เมื่อไม่ได้ input speed และ ใส่ข้อมูลไม่ครบ
         if self._Speedclicked.get() != "Choose Speed":
             self._speed = self._Speedclicked.get()
             self._speed = self.speed_options.index(self._speed)+1
             #NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
             self._cpu = self._processor_score[int(round(
-                (((self._speed - 1)*(5-0))/(10-1))+1, 0))]
+                (((self._speed - 1)*(5-0))/(10-1))+0, 0))]
             self._SSD = int(self.SSD_Option[int(
-                ((self._speed-1)*(4-1))/(10-1)+1)])/100
-            self._HDD = int(self.HDD_Option[int(
-                ((self._speed-1)*(2-0))/(10-1)+0)])/100
+                ((self._speed-1)*(4-0))/(10-1)+0)])/100
+            if self._speed < 3:
+                self._HDD = int(self.HDD_Option[2])/100
+            else:
+                self._HDD = 0
             self._resolution = self._resolution_score[int(
                 ((self._speed-1)*(3-1))/(10-1)+1)]
             self._ram = self._ramgb[int(
                 ((self._speed-1)*(3-0))/(10-1)+0)]
             self._gpu = round((((self._speed-1)*(9-2))/(10-1)
-                               )+2+random.uniform(0, 0.6), 1)
-            self._price = (((((self._speed-1)*(100000-6000)) /
-                           (10-1))+6000)/10000)+round(random.uniform(0, 0.5), 4)
-            self.uservector = [self._price,
-                               self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution]
+                               )+2+random.uniform(0, 0.7), 1)
+            self._price = (self._speed)+round(random.uniform(0, 0.5), 4)
+            self.uservector = np.asarray([self._price,
+                                          self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution])
 
             return 0
         else:
@@ -162,8 +164,8 @@ class AppWindow:
                 self._gpu = self._gpu_scale.get()
 
                 self._price = float(self._pricebox.get("1.0", tk.END))/10000
-                self.uservector = [self._price,
-                                   self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution]
+                self.uservector = np.asarray([self._price,
+                                              self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution])
                 return 0
             except:
                 return 1
