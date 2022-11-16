@@ -10,8 +10,11 @@ class AppWindow:
     def __init__(self, root):
         self.root = root
         self.root.title("Which Laptop Should I Pick")
-        self.root.geometry("450x580")
+        self.root.geometry("%dx%d+%d+%d" % (450, 600, int((self.root.winfo_screenwidth()/2) -
+                           (450/2)), int((self.root.winfo_screenheight()/2)-(600/2))))
         root.resizable(width=False, height=False)
+        self._SSDGB = [0, 128, 256, 512, 1000, 2000]
+        self._HDDGB = [0, 512, 1000]
         self._processor_score = [1, 2,  3,  5,  7,  9]
         # HD,FHD,2K,4K
         self._resolution_score = [1,  3,  5,  7]
@@ -78,11 +81,12 @@ class AppWindow:
         self._ram_drop.pack(ipadx=10, ipady=10, expand=True)
         ####################################################### Storage SSD ############################################
         self.SSD_Option = [
-            "0",
-            "256",
-            "512",
-            "1000",
-            "2000"
+            "0 GB",
+            "128 GB",
+            "256 GB",
+            "512 GB",
+            "1000 GB",
+            "2000 GB"
         ]
         self.SSDClick = tk.StringVar()
         self.SSDClick.set("Choose SSD Capacity ")
@@ -91,7 +95,7 @@ class AppWindow:
         self._storage_drop.config(width=15)
         self._storage_drop.pack(ipadx=20, ipady=10, expand=True)
         ####################################################### Storage HDD ###############################################
-        self.HDD_Option = ['0', "512", "1000"]
+        self.HDD_Option = ['0 GB', "512 GB", "1000 GB"]
         self.HHDClick = tk.StringVar()
         self.HHDClick.set("Choose HDD Capacity")
         self._HHD_Drop = tk.OptionMenu(
@@ -135,17 +139,17 @@ class AppWindow:
         if self._Speedclicked.get() != "Choose Speed":
             self._speed = self._Speedclicked.get()
             self._speed = self.speed_options.index(self._speed)+1
-            #NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+            # NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
 
             self._cpu = self._processor_score[int(round(
                 (((self._speed - 1)*(5-1))/(10-0))+1, 0))]
-            self._SSD = int(self.SSD_Option[int(
-                ((self._speed-1)*(4-1))/(10-1)+1)])/100
+            self._SSD = int(self._SSDGB[int(
+                ((self._speed-1)*(5-2))/(10-1)+2)])/100
             if self._speed == 1:
                 self._HDD = 0
 
             elif self._speed <= 3:
-                self._HDD = int(self.HDD_Option[2])/100
+                self._HDD = self._HDDGB[2]/100
             else:
                 self._HDD = 0
             if self._speed == 1:
@@ -166,7 +170,6 @@ class AppWindow:
             self._price = (self._speed/1.32)+round(random.uniform(0, 0.5), 4)
             self.uservector = np.asarray([self._price,
                                           self._cpu, self._SSD, self._HDD, self._ram, self._gpu, self._resolution])
-            print(self.uservector)
             return 0
         else:
             try:
@@ -174,9 +177,11 @@ class AppWindow:
                 self._cpu = self._processor_score[self.cpu_option.index(
                     self.CPUclicked.get())]
 
-                self._SSD = int(self.SSDClick.get())/100
+                self._SSD = self._SSDGB[self.SSD_Option.index(
+                    self.SSDClick.get())]/100
 
-                self._HDD = int(self.HHDClick.get())/100
+                self._HDD = self._HDDGB[self.HDD_Option.index(
+                    self.HHDClick.get())]/100
 
                 self._resolution = self._resolution_score[self.resolution_options.index(
                     self._Resolutionclicked.get())]
@@ -198,7 +203,8 @@ class AppWindow:
         if readstatus == 0:
             newWindow = tk.Toplevel(self.root)
             newWindow.title("Your Laptop")
-            newWindow.geometry("450x800")
+            newWindow.geometry(
+                "%dx%d+%d+%d" % (450, 800, self.root.winfo_x()-450, self.root.winfo_y()))
             similarity = calculate_cosine_sim(self.uservector, numpydata)
             text = df_to_show.loc[similarity.index(
                 max(similarity))].to_list()
